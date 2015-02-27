@@ -1,6 +1,8 @@
 package com.gauntlet.states
 {
-	import com.gauntlet.objects.Hero;
+	import com.gauntlet.objects.enemies.Bat;
+	import com.gauntlet.objects.enemies.Ghost;
+	import com.gauntlet.objects.player.Hero;
 	import flash.display.BlendMode;
 	import org.flixel.*;
 
@@ -136,6 +138,8 @@ package com.gauntlet.states
 		/**
 		 * @private
 		 * Create a new room with option to place platforms.
+		 * 
+		 * @param $bMakePlatforms		Whether or not to generate platforms.
 		 */
 		protected function generateRoomTiles($bMakePlatforms:Boolean):void
 		{
@@ -152,12 +156,23 @@ package com.gauntlet.states
 					}
 				}
 			}
-			
 			this._nLevelNumber++;
 			
 			this._bLevelComplete = false;
 			
 			add(levelMap);
+		}
+		
+		
+		/* ---------------------------------------------------------------------------------------- */
+		
+		/**
+		 * @private
+		 * Place enemies on the map.
+		 */
+		protected function placeEnemies():void
+		{
+			
 		}
 		
 		
