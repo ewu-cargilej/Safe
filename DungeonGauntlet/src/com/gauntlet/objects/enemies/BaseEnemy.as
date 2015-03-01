@@ -14,7 +14,8 @@ package com.gauntlet.objects.enemies
 		protected var	_nContactDamage :int = 0;
 		/** Number of coins to drop. */
 		protected var	_nRewardValue	:int = 0;
-		
+		/** Point value of the enemy used for spawning. */
+		protected var	_nSpawnValue	:int = 0;
 		
 		/* ---------------------------------------------------------------------------------------- */
 		
@@ -27,12 +28,13 @@ package com.gauntlet.objects.enemies
 		 * @param   hp				Hit points.
 		 * @param	dmg				Contact damage amount.
 		 */
-		public function BaseEnemy(X:Number,Y:Number, hp:Number, dmg:int)
+		public function BaseEnemy(X:Number,Y:Number, hp:Number, dmg:int, value:int)
 		{
 			super(X, Y);
 			
 			this.health = hp;
 			this._nContactDamage = dmg;
+			_nSpawnValue = value;
 		}
 		
 		/**

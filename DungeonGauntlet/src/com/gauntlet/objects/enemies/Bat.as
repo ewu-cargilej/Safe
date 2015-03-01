@@ -1,6 +1,8 @@
 package com.gauntlet.objects.enemies
 {
-	
+	import flash.utils.Timer;
+	import org.flixel.FlxG;
+	import org.flixel.FlxObject;
 	/**
 	 * Bat enemy.
 	 * 
@@ -10,8 +12,10 @@ package com.gauntlet.objects.enemies
 	{
 		[Embed(source = "../../../../../embeded_resources/Game_Screen/Enemies/Bat.png")] private static var ImgBat:Class;
 		
-		/** Whether the bat is moving left. */
-		protected var	_bMovingLeft	:Boolean;
+		/** Counts the number of frames. */
+		protected var	_nFrame: int = 60;
+		/** Stores a random number from 0-100, used for bat movement. */
+		protected var	_nMoveValue: int = 0;
 		
 		/* ---------------------------------------------------------------------------------------- */
 		
@@ -23,9 +27,7 @@ package com.gauntlet.objects.enemies
 		 */
 		public function Bat(X:Number=0,Y:Number=0)
 		{
-			super(X, Y, 40, 20);
-			
-			this._bMovingLeft = true;
+			super(X, Y, 40, 20, 1);
 			
 			this.loadGraphic(ImgBat, true, true, 64, 32);
 			
@@ -37,9 +39,10 @@ package com.gauntlet.objects.enemies
 			
 			//basic player physics
 			this.drag.x = 2000;
-			this.acceleration.y = 500;
-			this.maxVelocity.x = 120;
-			this.maxVelocity.y = 0;
+			this.acceleration.y = 0;
+			this.maxVelocity.x = 60;
+			this.maxVelocity.y = 30;
+			this.drag.y = 2000;
 			
 			//animations
 			this.addAnimation("idle", [0]);
@@ -52,16 +55,59 @@ package com.gauntlet.objects.enemies
 		override public function update():void
 		{
 			super.update();
-			
+			this.acceleration.x = 0;
+			this.acceleration.y = 0;
 			this.play("idle");
-			
-			if (Math.random() * 100 < 20)
-				this._bMovingLeft = ! this._bMovingLeft;
-			
-			if (this._bMovingLeft)
-				this.acceleration.x -= this.drag.x;
-			else
+			_nFrame++;
+			if (_nFrame >= 15)//every 15 frames get a new move value
+			{
+			_nFrame = 0;
+			_nMoveValue = int(Math.random() * 100);
+			}
+			if (_nMoveValue>=0 && _nMoveValue<25)//move left
+			{
+				if (this.x<=32)//dont go off screen
+				{
 				this.acceleration.x += this.drag.x;
+				}
+				else
+				{
+				this.acceleration.x -= this.drag.x;	
+				}
+			}
+			if (_nMoveValue>=25 && _nMoveValue<50)//move right
+			{
+				if (this.x>=(FlxG.width-32-this.width))//dont go off screen
+				{
+				this.acceleration.x -= this.drag.x;	
+				}
+				else
+				{
+				this.acceleration.x += this.drag.x;	
+				}
+			}
+			if (_nMoveValue>=50 && _nMoveValue<75)//move up
+			{
+				if (this.y<=32)//dont go off screen
+				{
+				this.acceleration.y += this.drag.y;	
+				}
+				else
+				{
+				this.acceleration.y -= this.drag.y;	
+				}	
+			}
+			if (_nMoveValue>=75 && _nMoveValue<100)//move down
+			{
+				if (this.y>=(FlxG.height-96-this.height))//dont go off screen
+				{
+				this.acceleration.y -= this.drag.y;		
+				}
+				else
+				{
+				this.acceleration.y += this.drag.y;		
+				}
+			}
 		}
 		
 	}

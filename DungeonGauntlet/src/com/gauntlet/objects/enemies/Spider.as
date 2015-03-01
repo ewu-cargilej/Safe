@@ -1,5 +1,6 @@
 package com.gauntlet.objects.enemies
 {
+	import com.gauntlet.objects.player.Hero;
 	
 	/**
 	 * Spider enemy
@@ -11,7 +12,8 @@ package com.gauntlet.objects.enemies
 		[Embed(source = "../../../../../embeded_resources/Game_Screen/Enemies/Spider.png")] private static var ImgSpider:Class;
 		
 		/* ---------------------------------------------------------------------------------------- */
-		
+		/** Reference to the hero. */
+		private var _mcHero:	Hero;
 		/**
 		 * Constructs the Spider object.
 		 * 
@@ -20,7 +22,7 @@ package com.gauntlet.objects.enemies
 		 */
 		public function Spider(X:Number=0,Y:Number=0)
 		{
-			super(X, Y, 60, 20);
+			super(X, Y, 60, 20, 3);
 			
 			this.loadGraphic(ImgSpider, true, true, 32, 32);
 			
@@ -33,13 +35,13 @@ package com.gauntlet.objects.enemies
 			//basic player physics
 			this.drag.x = 2000;
 			this.acceleration.y = 500;
-			this.maxVelocity.x = 120;
-			this.maxVelocity.y = 0;
+			this.maxVelocity.x = 90;
+			this.maxVelocity.y = 500;
 			
 			//animations
 			this.addAnimation("idle", [0]);
 		}
-		
+		/* ---------------------------------------------------------------------------------------- */
 		/**
 		 * Called every frame.
 		 * Update the Enemy position and other stuff.
@@ -49,6 +51,24 @@ package com.gauntlet.objects.enemies
 			super.update();
 			
 			this.play("idle");
+			this.acceleration.x = 0;
+			if ((_mcHero.x - this.x) <= -16 && (_mcHero.x - this.x) >= -160)///just a place holder the real movement is yet to come
+			{
+				this.acceleration.x -= this.drag.x;
+			}
+			if ((_mcHero.x - this.x) >= 28 && (_mcHero.x - this.x) <= 160)///just a place holder the real movement is yet to come
+			{
+				this.acceleration.x += this.drag.x;
+			}
+		}
+		/* ---------------------------------------------------------------------------------------- */
+		/**
+		 * 
+		 * gets the hero to target
+		 */
+		public function acquireTarget(hero:Hero):void 
+		{
+			_mcHero = hero;
 		}
 		
 	}

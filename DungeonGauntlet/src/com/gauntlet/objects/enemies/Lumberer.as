@@ -1,6 +1,6 @@
 package com.gauntlet.objects.enemies
 {
-	
+	import com.gauntlet.objects.player.Hero;
 	/**
 	 * Lumberer enemy
 	 * 
@@ -14,7 +14,8 @@ package com.gauntlet.objects.enemies
 		protected var	_nAttackDamage	:int;
 		
 		/* ---------------------------------------------------------------------------------------- */
-		
+		/** Reference to the hero. */
+		private var _mcHero:	Hero;
 		/**
 		 * Constructs the Lumberer object.
 		 * 
@@ -23,7 +24,7 @@ package com.gauntlet.objects.enemies
 		 */
 		public function Lumberer(X:Number=0,Y:Number=0)
 		{
-			super(X, Y, 90, 25);
+			super(X, Y, 90, 25, 5);
 			
 			this._nAttackDamage = 40;
 			
@@ -38,8 +39,8 @@ package com.gauntlet.objects.enemies
 			//basic player physics
 			this.drag.x = 2000;
 			this.acceleration.y = 500;
-			this.maxVelocity.x = 120;
-			this.maxVelocity.y = 0;
+			this.maxVelocity.x = 45;
+			this.maxVelocity.y = 500;
 			
 			//animations
 			this.addAnimation("idle", [0]);
@@ -54,6 +55,24 @@ package com.gauntlet.objects.enemies
 			super.update();
 			
 			this.play("idle");
+			this.acceleration.x = 0;
+			if ((_mcHero.x - this.x) <= 0)///just a place holder the real movement is yet to come
+			{
+				this.acceleration.x -= this.drag.x;
+			}
+			if ((_mcHero.x - this.x) >= 0)///just a place holder the real movement is yet to come
+			{
+				this.acceleration.x += this.drag.x;
+			}
+		}
+		/* ---------------------------------------------------------------------------------------- */
+		/**
+		 * 
+		 * gets the hero to target
+		 */
+		public function acquireTarget(hero:Hero):void 
+		{
+			_mcHero = hero;
 		}
 	}
 }

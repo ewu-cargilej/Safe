@@ -1,7 +1,10 @@
 package com.gauntlet.states
 {
+	import com.gauntlet.objects.enemies.BaseEnemy;
 	import com.gauntlet.objects.enemies.Bat;
 	import com.gauntlet.objects.enemies.Ghost;
+	import com.gauntlet.objects.enemies.Lumberer;
+	import com.gauntlet.objects.enemies.Spider;
 	import com.gauntlet.objects.player.Hero;
 	import flash.display.BlendMode;
 	import org.flixel.*;
@@ -33,7 +36,7 @@ package com.gauntlet.states
 		
 		/** Player. */
 		protected var mcHero			:Hero;
-		
+		protected var mcBat			:Bat;///////////////////////////////////////////////////////////////////////////////////test
 		/**	Show current health. */
 		protected var _txtHealth		:FlxText;
 		
@@ -92,10 +95,29 @@ package com.gauntlet.states
 			}
 			
 			FlxG.collide(mcHero, levelMap);
-			
+			FlxG.collide(mcBat, levelMap);///////////////////////////////////////////////////////////////////////////////test
+			FlxG.overlap(mcHero, mcBat, CollideDamage);//////////////////////////////////////////////////////////////////test
+
 			wrap();
 		}
 		
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////test function
+		/* ---------------------------------------------------------------------------------------- */
+		
+		/**
+		 * @private
+		 * Hero takes damage and is immune until flicker is finished.
+		 */
+		private function CollideDamage($hero:Hero,$enemy:BaseEnemy):void
+		{
+		if (!$hero.flickering)
+		{
+			$hero.flicker();
+			trace("I took damage");
+			$enemy.flicker();
+		}
+		
+		}
 		/* ---------------------------------------------------------------------------------------- */
 		
 		/**
@@ -107,6 +129,10 @@ package com.gauntlet.states
 			mcHero = new Hero(FlxG.width/2 - 16, 640);
 			
 			add(mcHero);
+			
+			mcBat = new Bat(184, FlxG.height-192);/////////////////////////////////////////////////////////test
+			add(mcBat);////////////////////////////////////////////////////////////////////////////////////////test
+			//mcBat.acquireTarget(mcHero);////////////////////////////////////////////////////////////////////////test
 		}
 		
 		/* ---------------------------------------------------------------------------------------- */
