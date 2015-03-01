@@ -15,7 +15,8 @@ package com.gauntlet.objects.player
 		[Embed(source = "../../../../../embeded_resources/Game_Screen/Hero/Hero.png")] private static var ImgHero:Class;
 		
 		/* ---------------------------------------------------------------------------------------- */
-		
+		/** The hero's current maximum upgraded health. */
+		private var _nMaxheath:	int;
 		/**
 		 * Constructs the Hero object.
 		 * 
@@ -27,6 +28,9 @@ package com.gauntlet.objects.player
 			super(X, Y);
 			
 			this.loadGraphic(ImgHero, true, true, 32);
+			
+			//at the beginning, health is 100
+			this.health = 100;
 			
 			//bounding box tweaks
 			this.width = 16;
@@ -83,6 +87,20 @@ package com.gauntlet.objects.player
 			else
 			{
 				this.play("run");
+			}
+		}
+		/**
+		 * Damage the hero and check if dead.
+		 * 
+		 * @param	Damage			Number of health to take away.
+		 */
+		override public function hurt(Damage:Number):void
+		{
+			super.hurt(Damage);
+			
+			if (this.health <= 0)
+			{
+				//die
 			}
 		}
 	}

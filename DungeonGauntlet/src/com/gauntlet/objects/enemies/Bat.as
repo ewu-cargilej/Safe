@@ -110,6 +110,7 @@ package com.gauntlet.objects.enemies
 			}
 		}
 		
+		
 	}
 }
 

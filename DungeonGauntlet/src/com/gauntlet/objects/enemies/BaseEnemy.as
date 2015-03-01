@@ -60,6 +60,14 @@ package com.gauntlet.objects.enemies
 				//die
 			}
 		}
+		/**
+		 * 
+		 * Returns the contact damage value
+		 */
+		public function getContact():int
+		{
+		return this._nContactDamage;
+		}
 	}
 }
 
