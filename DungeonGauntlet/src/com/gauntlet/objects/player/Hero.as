@@ -4,6 +4,7 @@ package com.gauntlet.objects.player
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxG;
 	import org.flixel.FlxObject;
+	import com.gauntlet.states.ResultState;
 	
 	/**
 	 * The hero for the game.
@@ -100,7 +101,7 @@ package com.gauntlet.objects.player
 			
 			if (this.health <= 0)
 			{
-				//die
+				FlxG.switchState(new ResultState());
 			}
 		}
 	}

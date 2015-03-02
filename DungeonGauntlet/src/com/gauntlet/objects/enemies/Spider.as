@@ -1,6 +1,7 @@
 package com.gauntlet.objects.enemies
 {
 	import com.gauntlet.objects.player.Hero;
+	import org.flixel.FlxObject;
 	
 	/**
 	 * Spider enemy
@@ -55,10 +56,12 @@ package com.gauntlet.objects.enemies
 			if ((_mcHero.x - this.x) <= -16 && (_mcHero.x - this.x) >= -160)///just a place holder the real movement is yet to come
 			{
 				this.acceleration.x -= this.drag.x;
+				this.facing = FlxObject.RIGHT;
 			}
 			if ((_mcHero.x - this.x) >= 28 && (_mcHero.x - this.x) <= 160)///just a place holder the real movement is yet to come
 			{
 				this.acceleration.x += this.drag.x;
+				this.facing = FlxObject.LEFT;
 			}
 		}
 		/* ---------------------------------------------------------------------------------------- */

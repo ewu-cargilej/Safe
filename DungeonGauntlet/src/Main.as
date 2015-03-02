@@ -1,6 +1,6 @@
 package
 {
-	import com.gauntlet.states.PlayState;
+	import com.gauntlet.states.TitleState;
 	import org.flixel.*;
 	[Frame(factoryClass="com.gauntlet.loading.Preloader")]
 	
@@ -16,7 +16,7 @@ package
 		 */
 		public function Main() 
 		{
-			super(1024, 768, PlayState, 1, 30, 30);
+			super(1024, 768, TitleState, 1, 30, 30);
 		}
 		
 	}

@@ -1,6 +1,8 @@
 package com.gauntlet.objects.enemies
 {
 	import com.gauntlet.objects.player.Hero;
+	import org.flixel.FlxObject;
+	
 	/**
 	 * Lumberer enemy
 	 * 
@@ -59,10 +61,12 @@ package com.gauntlet.objects.enemies
 			if ((_mcHero.x - this.x) <= 0)///just a place holder the real movement is yet to come
 			{
 				this.acceleration.x -= this.drag.x;
+				this.facing = FlxObject.RIGHT;
 			}
 			if ((_mcHero.x - this.x) >= 0)///just a place holder the real movement is yet to come
 			{
 				this.acceleration.x += this.drag.x;
+				this.facing = FlxObject.LEFT;
 			}
 		}
 		/* ---------------------------------------------------------------------------------------- */
