@@ -10,11 +10,16 @@ package com.gauntlet.states
 	 */
 	public class ResultState extends FlxState
 	{
+		[Embed(source = '../../../../embeded_resources/Music/Victory.mp3')]private static var MusicVictory:Class;
+		[Embed(source = '../../../../embeded_resources/Music/Defeat.mp3')]private static var MusicDefeat:Class;
+		
 		/**
 		 * Set up the state.
 		 */
 		override public function create():void
 		{
+			FlxG.playMusic(MusicDefeat);
+			
 			var t:FlxText;
 			t = new FlxText(0, FlxG.height / 2 - 32, FlxG.width, "Results Screen");
 			t.size = 64;
@@ -37,7 +42,7 @@ package com.gauntlet.states
 			super.update();
 
 			if(FlxG.mouse.justPressed())
-				FlxG.switchState(new PlayState());
+				FlxG.switchState(new TitleState());
 		}
 	}
 }

@@ -41,7 +41,7 @@ package com.gauntlet.states
 			super.update();
 
 			if(FlxG.mouse.justPressed())
-				FlxG.switchState(new PlayState());
+				FlxG.switchState(new TitleState());
 		}
 	}
 }

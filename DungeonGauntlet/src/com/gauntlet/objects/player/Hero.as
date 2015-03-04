@@ -4,6 +4,7 @@ package com.gauntlet.objects.player
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxG;
 	import org.flixel.FlxObject;
+	import com.gauntlet.states.ResultState;
 	
 	/**
 	 * The hero for the game.
@@ -13,6 +14,7 @@ package com.gauntlet.objects.player
 	public class Hero extends FlxSprite
 	{
 		[Embed(source = "../../../../../embeded_resources/Game_Screen/Hero/Hero.png")] private static var ImgHero:Class;
+		[Embed(source = "../../../../../embeded_resources/SFX/Jump.mp3")] private static var SoundJump:Class;
 		
 		/* ---------------------------------------------------------------------------------------- */
 		/** The hero's current maximum upgraded health. */
@@ -73,6 +75,7 @@ package com.gauntlet.objects.player
 			{
 				this.y -= 1;
 				this.velocity.y = -350;
+				FlxG.play(SoundJump, .7, false);
 			}
 			
 			//animate based on movement
@@ -100,7 +103,7 @@ package com.gauntlet.objects.player
 			
 			if (this.health <= 0)
 			{
-				//die
+				FlxG.switchState(new ResultState());
 			}
 		}
 	}

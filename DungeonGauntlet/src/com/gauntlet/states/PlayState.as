@@ -5,28 +5,26 @@ package com.gauntlet.states
 	import com.gauntlet.objects.enemies.Ghost;
 	import com.gauntlet.objects.enemies.Lumberer;
 	import com.gauntlet.objects.enemies.Spider;
+	import com.gauntlet.objects.player.Arm;
 	import com.gauntlet.objects.player.Hero;
-	import flash.display.BlendMode;
+	import com.gauntlet.runes.Rune;
+	import com.gauntlet.runes.UpgradeManager;
 	import org.flixel.*;
+	import org.flixel.system.FlxTile;
 
 	/**
 	 * Play state.
-	 * Title Scree/Level 0
 	 * Gameplay
 	 * 
 	 * @author Casey Sliger
 	 */
 	public class PlayState extends FlxState
 	{
-		[Embed(source = '../../../../embeded_resources/Game_Screen/Level_Building/Rock_Tile.png')]private static var Tiles:Class;
+		[Embed(source = '../../../../embeded_resources/Game_Screen/Level_Building/Tiles.png')]private static var Tiles:Class;
 		[Embed(source = '../../../../embeded_resources/Game_Screen/Maps/empty_map.txt', mimeType = 'application/octet-stream')]private static var EmptyMap:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/TitleScreen_Logo.png')]private static var TitleLogo:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/Button_Play.png')]private static var PlayButton:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/Button_Credits.png')]private static var CreditsButton:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/Icon_Jump.png')]private static var ImgJump:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/Icon_MoveLeft.png')]private static var ImgLeft:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/Icon_MoveRight.png')]private static var ImgRight:Class;
-		[Embed(source = '../../../../embeded_resources/Title_Screen/Icon_Pause.png')]private static var ImgPause:Class;
+		
+		[Embed(source = '../../../../embeded_resources/Music/Play.mp3')]private static var MusicPlay:Class;
+		[Embed(source = '../../../../embeded_resources/Music/Boss.mp3')]private static var MusicBoss:Class;
 		
 		/** Level Complete flag. */
 		protected var	_bLevelComplete	:Boolean;
@@ -37,8 +35,13 @@ package com.gauntlet.states
 		/** Player. */
 		protected var mcHero			:Hero;
 		
-		protected var mcSpider			:Spider;///////////////////////////////////////////////////////////////////////////////////test
-		/**	Show current health. */
+		/** Arm of player*/
+		protected var mcArm				:Arm;
+		
+		/** All enemies on the screen. */
+		protected var _enemyGroup		:FlxGroup;
+		
+		/** Show current health. */
 		protected var _txtHealth		:FlxText;
 		
 		/**	Show current score. */
@@ -50,30 +53,48 @@ package com.gauntlet.states
 		/** Current level number. */
 		protected var _nLevelNumber		:int;
 		
-		/** Holder for Title components */
-		protected var	_aTitleStuff	:Array;
-		
-		/** Flag for if the title screen is active */
-		protected var	_bShowTitle		:Boolean;
+		/** The upgrade manage for the runes and health*/
+		protected var 	upgrades		:UpgradeManager;
 		
 		/**
 		 * Set up the state.
 		 */
 		override public function create():void
 		{
+			FlxG.playMusic(MusicPlay);
+			
 			FlxG.mouse.show();
 			
 			this._bLevelComplete = false;
-			this._nLevelNumber = 0;
-			this._aTitleStuff = new Array();
-			this._bShowTitle = true;
+			this._nLevelNumber = 1;
+			this._enemyGroup = new FlxGroup();
 			
-			setupPlayer();
+			add(_enemyGroup);
+			this.upgrades = new UpgradeManager();
+			
+			setupPlayer(32, 640);
+			
+			
+			upgrades.displayButtonSignal.add(add);
+			upgrades.removeButtonSignal.add(remove);
+			upgrades.newRuneSignal.add(mcArm.loadRune);
 			
 			levelMap = new FlxTilemap();
-			this.generateRoomTiles(false);
+			this.generateRoomTiles(true);
+			this.placeEnemies();
 			
-			this.createTitle();
+			
+			_txtHealth = new FlxText(64, FlxG.height - 48, 150, "HP: " + this.mcHero.health);
+			_txtHealth.size = 24;
+			add(_txtHealth);
+			
+			_txtScore = new FlxText(FlxG.width/2 - 64, FlxG.height - 48, 150, "Score:");
+			_txtScore.size = 24;
+			add(_txtScore);
+			
+			_txtRune = new FlxText(FlxG.width - 192, FlxG.height - 48, 150, "Rune:");
+			_txtRune.size = 24;
+			add(_txtRune);
 		}
 		
 		/* ---------------------------------------------------------------------------------------- */
@@ -87,7 +108,11 @@ package com.gauntlet.states
 			super.update();
 			
 			if (FlxG.keys.justPressed("K"))
+			{
 				this._bLevelComplete = true;
+				this._enemyGroup.kill();
+				this._enemyGroup.clear();
+			}
 			
 			if (this._bLevelComplete)
 			{
@@ -96,43 +121,63 @@ package com.gauntlet.states
 			}
 			
 			FlxG.collide(mcHero, levelMap);
-			FlxG.collide(mcSpider, levelMap);///////////////////////////////////////////////////////////////////////////////test
-			FlxG.overlap(mcHero, mcSpider, CollideDamage);//////////////////////////////////////////////////////////////////test
-
+			
+			FlxG.collide(_enemyGroup, levelMap);
+			
+			FlxG.overlap(mcHero, _enemyGroup, collideDamage);
+			
+			
+			if (mcArm.x - 3.5 != mcHero.x)
+			{
+				mcArm.x  = mcHero.x - 3.5;
+			}
+			if (mcArm.y + 11 != mcHero.y)
+			{
+				mcArm.y = mcHero.y + 11;
+			}
+			
 			wrap();
 		}
 		
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////test function
 		/* ---------------------------------------------------------------------------------------- */
 		
 		/**
 		 * @private
 		 * Hero takes damage and is immune until flicker is finished.
 		 */
-		private function CollideDamage($hero:Hero,$enemy:BaseEnemy):void
+		private function collideDamage($hero:Hero,$enemy:BaseEnemy):void
 		{
-		if (!$hero.flickering)
-		{
-			$hero.flicker();
-			$hero.hurt($enemy.getContact());
+			if (!$hero.flickering)
+			{
+				$hero.flicker();
+				$hero.hurt($enemy.getContact());
+				
+				this._txtHealth.text = "HP: " + this.mcHero.health;
+			}
 		}
 		
-		}
 		/* ---------------------------------------------------------------------------------------- */
 		
 		/**
 		 * @private
 		 * Initially create and place the hero.
+		 * 
+		 * @param $spawnX
+		 * @param $spawnY
 		 */
-		protected function setupPlayer():void
+		protected function setupPlayer($spawnX:int, $spawnY:int):void
 		{
-			mcHero = new Hero(FlxG.width/2 - 16, 640);
+			mcHero = new Hero($spawnX, $spawnY);
 			
 			add(mcHero);
 			
-			mcSpider = new Spider(184, FlxG.height-192);/////////////////////////////////////////////////////////test
-			add(mcSpider);////////////////////////////////////////////////////////////////////////////////////////test
-			mcSpider.acquireTarget(mcHero);////////////////////////////////////////////////////////////////////////test
+			mcArm = new Arm(mcHero.x + 16, mcHero.y);
+			
+			add(mcArm);
+			
+			mcArm.addRuneSignal.add(add);
+			
+			mcArm.loadRune(new Rune(FlxG.width / 2 - 16, 640));			
 		}
 		
 		/* ---------------------------------------------------------------------------------------- */
@@ -150,10 +195,30 @@ package com.gauntlet.states
 			{
 				this.mcHero.x = 32;
 				
-				if (this._nLevelNumber == 12)//go to results
+				if (this._nLevelNumber == 11)
 					FlxG.switchState(new ResultState());
 				else
-					this.generateRoomTiles(this._nLevelNumber < 11);
+				{
+					if (this._nLevelNumber < 10)
+					{
+						this.generateRoomTiles(true);
+						this.placeEnemies();
+						this._nLevelNumber++;
+					}
+					else
+					{
+						this.generateRoomTiles(false);
+						this._nLevelNumber++;
+						
+						FlxG.music.stop();
+						FlxG.playMusic(MusicBoss);
+						
+						var mcGhost :Ghost = new Ghost(FlxG.width/2, FlxG.height - 192);
+						this._enemyGroup.add(mcGhost);
+						add(mcGhost);
+						mcGhost.acquireTarget(mcHero);
+					}
+				}
 			}
 				
 		}
@@ -173,16 +238,13 @@ package com.gauntlet.states
 			
 			if ($bMakePlatforms)
 			{
-				for (var x :int = 1; x < levelMap.widthInTiles - 1; x++)
-				{
-					for (var y :int = 3; y < levelMap.heightInTiles - 2; y+=3)
-					{
-						if(Math.random() * 20 > 5)
-							levelMap.setTile(x, y, 1);
-					}
-				}
+				var n :Number = Math.random();
+				
+				if (n < .5)
+					genBasic();
+				else
+					genNatesRecommendation();
 			}
-			this._nLevelNumber++;
 			
 			this._bLevelComplete = false;
 			
@@ -194,97 +256,83 @@ package com.gauntlet.states
 		
 		/**
 		 * @private
+		 * Generate platforms, basic platforms.
+		 *
+		 */
+		protected function genBasic():void
+		{
+			for (var x :int = 1; x < levelMap.widthInTiles - 1; x++)
+			{
+				for (var y :int = 3; y < levelMap.heightInTiles - 2; y+=3)
+				{
+					if(Math.random() * 20 > 5)
+						levelMap.setTile(x, y, int(Math.random() * 4 + 1));
+				}
+			}
+		}
+		
+		/* ---------------------------------------------------------------------------------------- */
+		
+		/**
+		 * @private
+		 * Generate platforms as recommended from the proto presentation.
+		 *
+		 */
+		protected function genNatesRecommendation():void
+		{
+			for (var x :int = 1; x < levelMap.widthInTiles - 1; x++)
+			{
+				for (var y :int = 3; y < levelMap.heightInTiles - 2; y+=3)
+				{
+					if(Math.random() * 20 > 5)
+						levelMap.setTile(x, y - 1 + int(Math.random() * 2), int(Math.random() * 4 + 1));
+				}
+			}
+			
+		}
+		
+		
+		/* ---------------------------------------------------------------------------------------- */
+		
+		/**
+		 * @private
 		 * Place enemies on the map.
 		 */
 		protected function placeEnemies():void
 		{
-			
-		}
-		
-		
-		/* ---------------------------------------------------------------------------------------- */
-		
-		/**
-		 * @private
-		 * Place stuff for Title Screen.
-		 *
-		 */
-		protected function createTitle():void
-		{
-			var tmpSprite :FlxSprite = new FlxSprite(FlxG.width / 2 - 225, FlxG.height / 2 - 300, TitleLogo);
-			this._aTitleStuff.push(tmpSprite);
-			add(tmpSprite);
-			
-			tmpSprite = new FlxSprite(FlxG.width / 2 - 35, FlxG.height / 2 + 50, ImgJump);
-			this._aTitleStuff.push(tmpSprite);
-			add(tmpSprite);
-			
-			tmpSprite = new FlxSprite(FlxG.width / 2 + 70, FlxG.height / 2 + 150, ImgRight);
-			this._aTitleStuff.push(tmpSprite);
-			add(tmpSprite);
-			
-			tmpSprite = new FlxSprite(FlxG.width / 2 - 140, FlxG.height / 2 + 150, ImgLeft);
-			this._aTitleStuff.push(tmpSprite);
-			add(tmpSprite);
-			
-			tmpSprite = new FlxSprite(FlxG.width / 2 - 95, FlxG.height - 68, ImgPause);
-			this._aTitleStuff.push(tmpSprite);
-			add(tmpSprite);
-			
-			var tmpButton :FlxButton = new FlxButton(FlxG.width - 350, FlxG.height / 2, "", removeTitle);
-			tmpButton.loadGraphic(PlayButton);
-			this._aTitleStuff.push(tmpButton);
-			add(tmpButton);
-			
-			tmpButton = new FlxButton(60, FlxG.height / 2, "", goToCredits);
-			tmpButton.loadGraphic(CreditsButton);
-			this._aTitleStuff.push(tmpButton);
-			add(tmpButton);
-		}
-		
-		/* ---------------------------------------------------------------------------------------- */
-		
-		/**
-		 * @private
-		 * Remove stuff for Title Screen.
-		 * Add stuff for UI.
-		 */
-		protected function removeTitle():void
-		{
-			this._bLevelComplete = true;
-			
-			var tmpObj: FlxObject;
-			
-			while (this._aTitleStuff.length > 0)
+			for (var x :int = 7; x < levelMap.widthInTiles - 2; x++)
 			{
-				tmpObj = this._aTitleStuff.pop();
-				tmpObj.destroy();
-				remove(tmpObj);
+				for (var y :int = 2; y < levelMap.heightInTiles - 2; y+=3)
+				{
+					if (levelMap.getTile(x,y) == 0 && Math.random() * 20 > 19)
+					{
+						var n :int = int(Math.random() * 3);
+						
+						if (n == 0)
+						{
+							var mcBat :Bat = new Bat(x * 32, y * 32);
+							this._enemyGroup.add(mcBat);
+							add(mcBat);
+						}
+						else if (n == 1)
+						{
+							var mcSpider :Spider = new Spider(x * 32, y * 32);
+							this._enemyGroup.add(mcSpider);
+							add(mcSpider);
+							mcSpider.acquireTarget(mcHero);
+						}
+						else
+						{
+							var mcLumberer :Lumberer = new Lumberer(x * 32, y * 32);
+							this._enemyGroup.add(mcLumberer);
+							add(mcLumberer);
+							mcLumberer.acquireTarget(mcHero);
+						}
+						
+					}
+				}
 			}
 			
-			_txtHealth = new FlxText(64, FlxG.height - 48, 150, "Health:");
-			_txtHealth.size = 24;
-			add(_txtHealth);
-			
-			_txtScore = new FlxText(FlxG.width/2 - 64, FlxG.height - 48, 150, "Score:");
-			_txtScore.size = 24;
-			add(_txtScore);
-			
-			_txtRune = new FlxText(FlxG.width - 192, FlxG.height - 48, 150, "Rune:");
-			_txtRune.size = 24;
-			add(_txtRune);
-		}
-		
-		/* ---------------------------------------------------------------------------------------- */
-		
-		/**
-		 * @private
-		 * Go to credits.
-		 *
-		 */
-		protected function goToCredits():void
-		{
-			FlxG.switchState(new CreditsState());
 		}
 	}
 }
